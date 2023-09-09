@@ -35,27 +35,27 @@ const Image = () => {
     navigate('/home')
   }
 
+  const goToList = () => {
+    navigate('/image-list')
+  }
+
   const logOut = () => {
     localStorage.removeItem('token')
     navigate('/')
   }
 
-  console.log("ID: ", id);
 
   return (
-    // <div>
-    //   {imageUrl && <img src={decodeURIComponent(imageUrl)} alt="img"  />}
-    //   {imageName && <h3>{imageName}</h3>}
-    // </div>
 
     <div>
         <div style={{display:'flex', justifyContent:"space-between", }} >
           <button style={{margin:"20px", padding:"10px"}} onClick={() => goToHome()}  >Home</button>
+          <button style={{margin:"20px", padding:"10px"}} onClick={() => goToList()}  >List</button>
           <button style={{margin:"20px", padding:"10px"}} onClick={() => logOut()} >Logout</button>
         </div>
         <div>
           <h3>{imageName}</h3>
-          <img src={imageUrl} alt="img" width={900} />
+          <img src={imageUrl} alt="img" width={800} height={800} />
         </div>
     </div>
   )

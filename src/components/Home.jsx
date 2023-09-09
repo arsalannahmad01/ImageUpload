@@ -18,12 +18,13 @@ function Home() {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState(null);
+  const [error, setError] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (localStorage.getItem("token")) setIsLoggedIn(true);
-    setToken(JSON.parse(localStorage.getItem('token')))
+    setToken(JSON.parse(localStorage.getItem("token")));
   });
 
   const handleFileChange = (event) => {
@@ -43,13 +44,20 @@ function Home() {
       image_url: res,
     };
 
-    const data = await axios.post("http://127.0.0.1:5000/api/upload", payload, {
-      headers: { Authorization: token },
-    });
+    await axios
+      .post("http://127.0.0.1:5000/api/upload", payload, {
+        headers: { Authorization: token },
+      })
+      .then((response) => {
+        navigate(`/image/${response.data._id}`);
+      })
+      .catch((error) => {
+        setError(true);
+        console.log(error);
+      });
 
-    if(data.data)
-      navigate(`/image/${data.data._id}`);
-
+    // if(data.data)
+    //   navigate(`/image/${data.data._id}`);
   };
 
   const handleLogin = async () => {
@@ -71,16 +79,26 @@ function Home() {
     }
   };
 
+  const goToList = () => {
+    navigate('/image-list')
+  }
+
+  const logOut = () => {
+    localStorage.removeItem("token");
+    navigate("/home");
+  };
 
   return (
     <div className="App">
       <div className="header">
+        <button style={{margin:"20px", padding:"10px"}} onClick={() => goToList()}  >List</button>
         {isLoggedIn ? (
-          <h2
-            style={{ color: "#6262A3", marginRight: "20px", marginTop: "20px" }}
+          <button
+            style={{ margin: "20px", padding: "10px" }}
+            onClick={() => logOut()}
           >
-            LoggedIn
-          </h2>
+            Logout
+          </button>
         ) : (
           <button className="login-button" onClick={() => setIsModalOpen(true)}>
             Login
@@ -90,14 +108,22 @@ function Home() {
       <div className="upload-container">
         <label className="uploadIcon">
           <img src={UploadIcon} width={100}></img>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+          {imageName != null ? (
+            <p style={{ fontStyle: "italic", fontSize: "18px" }}>{imageName}</p>
+          ) : null}
         </label>
         <button onClick={handleUpload}>Upload Image</button>
       </div>
+      <Modal
+        isOpen={error}
+        onRequestClose={() => setError(false)}
+        contentLabel="Error Modal"
+        className="modal"
+      >
+        <p style={{ color: "red" }}>You are not authorized!</p>
+        <p style={{ color: "#0074d9" }}>Login to uppload images.</p>
+      </Modal>
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
@@ -118,6 +144,8 @@ function Home() {
           onChange={(e) => setPassword(e.target.value)}
         />
         <button onClick={handleLogin}>Login</button>
+        <p style={{margin:"10px auto"}} >or</p>
+        <h2 style={{margin:"auto"}} >Google Login</h2>
       </Modal>
     </div>
   );
